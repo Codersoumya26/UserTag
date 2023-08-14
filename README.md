@@ -36,3 +36,8 @@ pip install "uvicorn[standard]"
 ```bash
 uvicorn main:app --reload
 ```
+
+*To Install RDBMS
+```bash
+pip install SQLAlchemy
+```
