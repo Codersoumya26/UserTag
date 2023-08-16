@@ -1,7 +1,7 @@
 from starlette import status
 from starlette.responses import RedirectResponse
 from typing import Optional
-from fastapi import Depends, APIRouter, Request
+from fastapi import Depends, APIRouter, HTTPException, Request
 import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
@@ -30,11 +30,11 @@ def get_db():
         db.close()
 
 
-class Todo(BaseModel):
-    title: str
+class Tag(BaseModel):
+    name: str
     description: Optional[str]
     # ratings: int = Field(gt=0, lt=6, description="The ratings must be between 1-5")
-    complete: bool
+    popular: bool
 
 
 # @router.get("/test")
@@ -46,6 +46,42 @@ class Todo(BaseModel):
 async def get_all_tag(db: Session = Depends(get_db)):
     return db.query(models.Tags).all()
 
+
+@router.get("/{tag_id}")
+async def get_tag_by_id(tag_id: int, db: Session = Depends(get_db)):
+    todo_model = db.query(models.Tags)\
+        .filter(models.Tags.id == tag_id)\
+        .first()
+    if todo_model is not None:
+        return todo_model
+    raise http_exception()
+
+
+@router.post("/add-tag")
+async def add_tag(tag: Tag, db: Session = Depends(get_db)):
+    tag_model = models.Tags()
+    tag_model.name = tag.name
+    tag_model.description = tag.description
+    tag_model.popular = tag.popular
+    # tag_model.owner_id = 1
+
+    db.add(tag_model)
+    db.commit()
+
+    return successful_response(201)
+
+
+def successful_response(status_code: int):
+    return {
+        'status': status_code,
+        'transaction': 'Successful'
+    }
+
+
+def http_exception():
+    return HTTPException(status_code=404, detail="Tag not found")
+
+#
 # @router.get("/", response_class=HTMLResponse)
 # async def get_all_tag_by_user(request: Request, db: Session = Depends(get_db)):
 #     tags = db.query(models.Tags).all()
