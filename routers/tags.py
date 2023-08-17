@@ -93,6 +93,20 @@ async def edit_todo_commit(request: Request, tag_id: int, name: str = Form(...),
     return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
 
 
+@router.get("/delete/{tag_id}")
+async def delete_tag(request: Request, tag_id: int, db: Session = Depends(get_db)):
+    tag_model = db.query(models.Tags).filter(models.Tags.id == tag_id).first()
+
+    if tag_model is None:
+        return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
+
+    db.query(models.Tags).filter(models.Tags.id == tag_id).delete()
+
+    db.commit()
+
+    return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
+
+
 def successful_response(status_code: int):
     return {
         'status': status_code,
