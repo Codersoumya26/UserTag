@@ -73,6 +73,26 @@ async def add_tag(name: str = Form(...), description: str = Form(...), db: Sessi
     return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
 
 
+@router.get("/edit-tag/{tag_id}", response_class=HTMLResponse)
+async def edit_todo(request: Request, tag_id: int, db: Session = Depends(get_db)):
+    tag = db.query(models.Tags).filter(models.Tags.id == tag_id).first()
+    return templates.TemplateResponse("edit-tag.html", {"request": request, "tag": tag,})
+
+
+@router.post("/edit-tag/{tag_id}", response_class=HTMLResponse)
+async def edit_todo_commit(request: Request, tag_id: int, name: str = Form(...), description: str = Form(...),
+                           db: Session = Depends(get_db)):
+    tag_model = db.query(models.Tags).filter(models.Tags.id == tag_id).first()
+
+    tag_model.name = name
+    tag_model.description = description
+
+    db.add(tag_model)
+    db.commit()
+
+    return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
+
+
 def successful_response(status_code: int):
     return {
         'status': status_code,
