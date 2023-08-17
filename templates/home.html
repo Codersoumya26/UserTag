@@ -1,0 +1,67 @@
+  {% include 'layout.html' %}
+
+<!--  <div class="jumbotron text-center">-->
+<!--    <h1>Welcome to My Website</h1>-->
+<!--    <p>This is a simple homepage built with Bootstrap.</p>-->
+<!--    <a href="#" class="btn btn-primary">Learn More</a>-->
+<!--  </div>-->
+<div class="container">
+    <div class="card text-center">
+        <div class="card-header">
+            User's Tags
+        </div>
+        <div class="card-body">
+            <h5 class="card-title"> TAG List </h5>
+            <p class="card-text"> Rate Your User By Category </p>
+
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col"> # </th>
+                        <th scope="col"> Info </th>
+                        <th scope="col"> Actions </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for tag in tags %}
+<!--                {% if tag.popular == True %}-->
+                <tr class="pointer">
+                    <td> {{ loop.index }} </td>
+                    <td> {{ tag.name }} </td>
+<!--                    <td>-->
+<!--                        <button onclick="window.location.href='/tags/popular/{{tag.id}}'"-->
+<!--                                type="button" class="btn btn-success"> Dislike </button>-->
+<!--                        <button onclick="window.location.href='/tags/edit-tag/{{tag.id}}'"-->
+<!--                                type="button" class="btn btn-info">-->
+<!--                            Edit-->
+<!--                        </button>-->
+<!--                    </td>-->
+                </tr>
+<!--                {% else %}-->
+<!--                <tr class="pointer alert alert-success">-->
+<!--                    <td> {{ loop.index }} </td>-->
+<!--                    <td class="strike-through-td"> {{ tag.name }} </td>-->
+<!--                    <td>-->
+<!--                        <button onclick="window.location.href='/tags/popular/{{tag.id}}'"-->
+<!--                                type="button" class="btn btn-success"> Set Popular </button>-->
+<!--                        <button onclick="window.location.href='/tags/edit-tag/{{tag.id}}'"-->
+<!--                                type="button" class="btn btn-info">-->
+<!--                            Edit-->
+<!--                        </button>-->
+<!--                    </td>-->
+<!--                </tr>-->
+<!--                {% endif %}-->
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <a class="btn btn-primary" href="add-tag">
+                Add new Tag in list ++
+            </a>
+        </div>
+    </div>
+</div>
+
+  {% include 'footer.html' %}

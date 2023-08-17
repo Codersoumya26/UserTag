@@ -6,7 +6,7 @@ import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 import sys
@@ -37,14 +37,11 @@ class Tag(BaseModel):
     popular: bool
 
 
-# @router.get("/test")
-# async def test(request: Request):
-#     return templates.TemplateResponse("add-tag.html", {"request": request})
-
-
-@router.get("/")
-async def get_all_tag(db: Session = Depends(get_db)):
-    return db.query(models.Tags).all()
+@router.get("/", response_class=HTMLResponse)
+# async def get_all_tag_by_user(request: Request, db: Session = Depends(get_db)):
+async def get_all_tag(request: Request, db: Session = Depends(get_db)):
+    tags = db.query(models.Tags).all()
+    return templates.TemplateResponse("home.html", {"request": request, "tags": tags})
 
 
 @router.get("/{tag_id}")
@@ -80,12 +77,6 @@ def successful_response(status_code: int):
 
 def http_exception():
     return HTTPException(status_code=404, detail="Tag not found")
-
-#
-# @router.get("/", response_class=HTMLResponse)
-# async def get_all_tag_by_user(request: Request, db: Session = Depends(get_db)):
-#     tags = db.query(models.Tags).all()
-#     return templates.TemplateResponse("home.html", {"request": request, "tags": tags})
 
 
 # @router.get("/add-tag", response_class=HTMLResponse)
