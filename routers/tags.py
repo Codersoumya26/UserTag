@@ -93,6 +93,17 @@ async def edit_todo_commit(request: Request, tag_id: int, name: str = Form(...),
     return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
 
 
+@router.get("/popular/{tag_id}", response_class=HTMLResponse)
+async def is_popular_tag(request: Request, tag_id: int, db: Session = Depends(get_db)):
+    tag_model = db.query(models.Tags).filter(models.Tags.id == tag_id).first()
+
+    tag_model.popular = not tag_model.popular
+
+    db.add(tag_model)
+    db.commit()
+    return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
+
+
 @router.get("/delete/{tag_id}")
 async def delete_tag(request: Request, tag_id: int, db: Session = Depends(get_db)):
     tag_model = db.query(models.Tags).filter(models.Tags.id == tag_id).first()

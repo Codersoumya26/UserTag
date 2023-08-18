@@ -14,6 +14,7 @@
                     <tr>
                         <th scope="col"> # </th>
                         <th scope="col"> Tag Name </th>
+                        <th scope="col"> Description </th>
                         <th scope="col"> Actions </th>
                     </tr>
                 </thead>
@@ -21,33 +22,33 @@
                 <tbody>
 
                 {% for tag in tags %}
-<!--                {% if tag.popular == True %}-->
+                {% if tag.popular == True %}
                 <tr class="pointer">
                     <td> {{ loop.index }} </td>
                     <td> {{ tag.name }} </td>
                     <td>
-<!--                        <button onclick="window.location.href='/tags/popular/{{tag.id}}'"-->
-<!--                                type="button" class="btn btn-success"> Dislike </button>-->
+                        <button onclick="window.location.href='/tags/popular/{{tag.id}}'"
+                                type="button" class="btn btn-success"> Dislike </button>
                         <button onclick="window.location.href='/tags/edit-tag/{{tag.id}}'"
                                 type="button" class="btn btn-info">
                             Edit
                         </button>
                     </td>
                 </tr>
-<!--                {% else %}-->
-<!--                <tr class="pointer alert alert-success">-->
-<!--                    <td> {{ loop.index }} </td>-->
-<!--                    <td class="strike-through-td"> {{ tag.name }} </td>-->
-<!--                    <td>-->
-<!--                        <button onclick="window.location.href='/tags/popular/{{tag.id}}'"-->
-<!--                                type="button" class="btn btn-success"> Set Popular </button>-->
-<!--                        <button onclick="window.location.href='/tags/edit-tag/{{tag.id}}'"-->
-<!--                                type="button" class="btn btn-info">-->
-<!--                            Edit-->
-<!--                        </button>-->
-<!--                    </td>-->
-<!--                </tr>-->
-<!--                {% endif %}-->
+                {% else %}
+                <tr class="pointer alert alert-success">
+                    <td> {{ loop.index }} </td>
+                    <td class="strike-through-td"> {{ tag.name }} </td>
+                    <td>
+                        <button onclick="window.location.href='/tags/popular/{{tag.id}}'"
+                                type="button" class="btn btn-success"> Set Popular </button>
+                        <button onclick="window.location.href='/tags/edit-tag/{{tag.id}}'"
+                                type="button" class="btn btn-info">
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+                {% endif %}
                 {% endfor %}
                 </tbody>
             </table>
