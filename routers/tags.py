@@ -8,9 +8,11 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-
 import sys
 sys.path.append("..")
+
+
+
 
 router = APIRouter(
     prefix="/tags",

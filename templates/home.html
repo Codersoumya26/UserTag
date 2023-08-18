@@ -26,6 +26,7 @@
                 <tr class="pointer">
                     <td> {{ loop.index }} </td>
                     <td> {{ tag.name }} </td>
+                    <td> {{ tag.description }} </td>
                     <td>
                         <button onclick="window.location.href='/tags/popular/{{tag.id}}'"
                                 type="button" class="btn btn-success"> Dislike </button>
@@ -39,6 +40,7 @@
                 <tr class="pointer alert alert-success">
                     <td> {{ loop.index }} </td>
                     <td class="strike-through-td"> {{ tag.name }} </td>
+                    <td> {{ tag.description }} </td>
                     <td>
                         <button onclick="window.location.href='/tags/popular/{{tag.id}}'"
                                 type="button" class="btn btn-success"> Set Popular </button>
