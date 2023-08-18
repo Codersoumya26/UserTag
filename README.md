@@ -32,7 +32,7 @@ pip install "uvicorn[standard]"
 ```
 
 
-*To run Application
+*To run Application in Local server
 ```bash
 uvicorn main:app --reload
 ```
@@ -40,4 +40,13 @@ uvicorn main:app --reload
 *To Install RDBMS
 ```bash
 pip install SQLAlchemy
+```
+
+*To Install Other dependencies
+```bash
+pip install "passlib[bcrypt]"
+pip install python-multipart
+pip install "python-Jose[cryptograph]"
+pip install aiofiles
+pip install jinja2
 ```
