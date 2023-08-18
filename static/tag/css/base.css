@@ -1,0 +1,33 @@
+
+body {
+  background: #fafafa;
+  color: #33333a;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #323232;
+}
+
+.main-color {
+  background-color: #0e76a8 ;
+}
+
+.strike-through-td {
+    text-decoration: line-through;
+}
+
+/* Custom CSS for colored rows */
+.table-row-blue {
+  background-color: #e3f2fd; /* Light blue */
+}
+
+.table-row-green {
+  background-color: #e8f5e9; /* Light green */
+}
+
+.table-row-yellow {
+  background-color: #fff9c4; /* Light yellow */
+}
+
+
+

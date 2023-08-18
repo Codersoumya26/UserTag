@@ -5,8 +5,10 @@ __pycache__/
 
 # C extensions
 *.so
+*.db
 
 # Distribution / packaging
+usertagvenv/
 .Python
 build/
 develop-eggs/
