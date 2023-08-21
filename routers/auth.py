@@ -181,6 +181,14 @@ async def login(request: Request, db: Session = Depends(get_db)):
         return templates.TemplateResponse("login.html", {"request": request, "msg": msg})
 
 
+@router.get("/logout")
+async def logout(request: Request):
+    msg = "Logout Successful"
+    response = templates.TemplateResponse("login.html", {"request": request, "msg": msg})
+    response.delete_cookie(key="access_token")
+    return response
+
+
 # Exceptions
 def get_user_exception():
     credentials_exception = HTTPException(
