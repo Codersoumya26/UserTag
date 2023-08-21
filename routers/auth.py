@@ -1,8 +1,8 @@
 from typing import Optional
-from fastapi import APIRouter, Request, Depends, HTTPException, status
+from fastapi import APIRouter, Request, Depends, HTTPException, status, Response, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -102,6 +102,22 @@ def authenticate_user(username: str, password: str, db):
     if not verify_password(password, user.hashed_password):
         return False
     return user
+
+
+# Token endpoint to authenticate and generate token
+@router.post("/token")
+async def login_for_access_token(response: Response, form_data: OAuth2PasswordRequestForm = Depends(),
+                                 db: Session = Depends(get_db)):
+    user = authenticate_user(form_data.username, form_data.password, db)
+    if not user:
+        return False
+    token_expires = timedelta(minutes=40)
+    token = create_access_token(user.username,
+                                user.id,
+                                expires_delta=token_expires)
+
+    response.set_cookie(key="access_token", value=token, httponly=True)
+    return True
 
 
 class CreateUser(BaseModel):
