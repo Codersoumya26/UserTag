@@ -2,25 +2,19 @@ from typing import Optional
 from fastapi import APIRouter, Request, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-import sys
-import models
 from database import SessionLocal, engine
+from datetime import datetime, timedelta
+from jose import jwt, JWTError
+import models
+import sys
 
 sys.path.append("..")
 
 
-class CreateUser(BaseModel):
-    username: str
-    email: str
-    first_name: Optional[str]
-    last_name: Optional[str]
-    password: str
-
-
-bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 models.Base.metadata.create_all(bind=engine)
 templates = Jinja2Templates(directory="templates")
 
@@ -39,18 +33,94 @@ def get_db():
         db.close()
 
 
+# Secret key to sign and verify tokens
+SECRET_KEY = "KlgH6AzYDeZeGwD288to79I3vTHT8wp7"
+ALGORITHM = "HS256"
+
+# Password hashing
+bcrypt_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# OAuth2 PasswordBearer for token authentication
+oauth2_bearer_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+# Function to verify access token
+def decode_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        return None
+
+
 def get_password_hash(password):
-    return bcrypt_context.hash(password)
+    return bcrypt_pwd_context.hash(password)
 
 
-@router.post("/create/user")
-async def create_new_user(new_user: CreateUser, db: Session = Depends(get_db)):
+# Function to verify user's password
+def verify_password(plain_password, hashed_password):
+    return bcrypt_pwd_context.verify(plain_password, hashed_password)
+
+
+# Function to create access token
+def create_access_token(username: str, user_id: int,
+                        expires_delta: Optional[timedelta] = None):
+    to_encode = {"sub": username, "id": user_id}
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+# Function to get current user based on token
+async def get_current_user(request: Request):
+    try:
+        token = request.cookies.get("access_token")
+        if token is None:
+            return None
+        payload = decode_token(token)
+        username: str = payload.get("sub")
+        user_id: int = payload.get("id")
+        if username is None or user_id is None:
+            return None
+        return {"username": username, "id": user_id}
+    except JWTError:
+        raise get_user_exception()
+
+
+# Function to authenticate user
+def authenticate_user(username: str, password: str, db):
+    user = db.query(models.Users)\
+        .filter(models.Users.username == username)\
+        .first()
+
+    if not user:
+        return False
+    if not verify_password(password, user.hashed_password):
+        return False
+    return user
+
+
+class CreateUser(BaseModel):
+    username: str
+    email: str
+    first_name: Optional[str]
+    last_name: Optional[str]
+    password: str
+
+
+@router.post("/add/admin-user")
+async def create_admin_user(new_user: CreateUser, db: Session = Depends(get_db)):
     new_user_model = models.Users()
     new_user_model.email = new_user.email
     new_user_model.username = new_user.username
     new_user_model.first_name = new_user.first_name
     new_user_model.last_name = new_user.last_name
     new_user_model.is_active = True
+    new_user_model.is_admin = True
 
     hash_password = get_password_hash(new_user.password)
     new_user_model.hashed_password = hash_password

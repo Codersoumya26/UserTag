@@ -45,7 +45,7 @@ async def add_tag(name: str = Form(...), description: str = Form(...), db: Sessi
     tag_model.name = name
     tag_model.description = description
     tag_model.popular = True
-    # tag_model.owner_id = 1
+    tag_model.owner_id = 1
 
     db.add(tag_model)
     db.commit()
