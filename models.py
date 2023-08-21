@@ -13,11 +13,11 @@ class Users(Base):
     last_name = Column(String)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
-    # is_admin = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)
     # admin_id = Column(Integer, ForeignKey("users.id"))
 
     # admin = relationship("Users", back_populates="admin")
-    # tag = relationship("Tags", back_populates="owner")
+    tag = relationship("Tags", back_populates="owner")
     association = relationship("Associations", back_populates="user")
 
 
@@ -28,9 +28,9 @@ class Tags(Base):
     name = Column(String)
     description = Column(String)
     popular = Column(Boolean, default=True)
-    # owner_id = Column(Integer, ForeignKey("users.id"))
-    #
-    # owner = relationship("Users", back_populates="tag")
+    owner_id = Column(Integer, ForeignKey("users.id"))
+
+    owner = relationship("Users", back_populates="tag")
     association = relationship("Associations", back_populates="tag")
 
 
@@ -40,7 +40,7 @@ class Associations(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     tag_id = Column(Integer, ForeignKey("tags.id"))
-    ratings = Column(Integer)
+    ratings = Column(Integer, default=1)
 
     user = relationship("Users", back_populates="association")
     tag = relationship("Tags", back_populates="association")

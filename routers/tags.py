@@ -1,17 +1,14 @@
 from starlette import status
 from starlette.responses import RedirectResponse
-from typing import Optional
 from fastapi import Depends, APIRouter, HTTPException, Request, Form
 import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from .auth import get_current_user
 import sys
 sys.path.append("..")
-
-
 
 
 router = APIRouter(
@@ -32,42 +29,37 @@ def get_db():
         db.close()
 
 
-# class Tag(BaseModel):
-#     name: str
-#     description: Optional[str]
-#     # ratings: int = Field(gt=0, lt=6, description="The ratings must be between 1-5")
-#     popular: bool
-
-
 @router.get("/", response_class=HTMLResponse)
-# async def get_all_tag_by_user(request: Request, db: Session = Depends(get_db)):
-async def get_all_tag(request: Request, db: Session = Depends(get_db)):
-    tags = db.query(models.Tags).all()
-    return templates.TemplateResponse("home.html", {"request": request, "tags": tags})
+async def get_all_tag_by_user(request: Request, db: Session = Depends(get_db)):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
 
-
-# @router.get("/{tag_id}")
-# async def get_tag_by_id(tag_id: int, db: Session = Depends(get_db)):
-#     todo_model = db.query(models.Tags)\
-#         .filter(models.Tags.id == tag_id)\
-#         .first()
-#     if todo_model is not None:
-#         return todo_model
-#     raise http_exception()
+    tags = db.query(models.Tags).filter(models.Tags.owner_id == user.get("id")).all()
+    return templates.TemplateResponse("home.html", {"request": request, "tags": tags, "user": user})
 
 
 @router.get("/add-tag", response_class=HTMLResponse)
-async def create_tag(request: Request):
-    return templates.TemplateResponse("add-tag.html", {"request": request})
+async def create_new_tag(request: Request):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+
+    return templates.TemplateResponse("add-tag.html", {"request": request, "user": user})
 
 
 @router.post("/add-tag", response_class=HTMLResponse)
-async def add_tag(name: str = Form(...), description: str = Form(...), db: Session = Depends(get_db)):
+async def add_tag(request: Request, name: str = Form(...), description: str = Form(...),
+                  db: Session = Depends(get_db)):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+
     tag_model = models.Tags()
     tag_model.name = name
     tag_model.description = description
     tag_model.popular = True
-    # tag_model.owner_id = 1
+    tag_model.owner_id = user.get("id")
 
     db.add(tag_model)
     db.commit()
@@ -77,13 +69,21 @@ async def add_tag(name: str = Form(...), description: str = Form(...), db: Sessi
 
 @router.get("/edit-tag/{tag_id}", response_class=HTMLResponse)
 async def edit_todo(request: Request, tag_id: int, db: Session = Depends(get_db)):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+
     tag = db.query(models.Tags).filter(models.Tags.id == tag_id).first()
-    return templates.TemplateResponse("edit-tag.html", {"request": request, "tag": tag,})
+    return templates.TemplateResponse("edit-tag.html", {"request": request, "tag": tag, "user": user})
 
 
 @router.post("/edit-tag/{tag_id}", response_class=HTMLResponse)
 async def edit_todo_commit(request: Request, tag_id: int, name: str = Form(...), description: str = Form(...),
                            db: Session = Depends(get_db)):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+
     tag_model = db.query(models.Tags).filter(models.Tags.id == tag_id).first()
 
     tag_model.name = name
@@ -95,20 +95,14 @@ async def edit_todo_commit(request: Request, tag_id: int, name: str = Form(...),
     return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
 
 
-@router.get("/popular/{tag_id}", response_class=HTMLResponse)
-async def is_popular_tag(request: Request, tag_id: int, db: Session = Depends(get_db)):
-    tag_model = db.query(models.Tags).filter(models.Tags.id == tag_id).first()
-
-    tag_model.popular = not tag_model.popular
-
-    db.add(tag_model)
-    db.commit()
-    return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
-
-
 @router.get("/delete/{tag_id}")
 async def delete_tag(request: Request, tag_id: int, db: Session = Depends(get_db)):
-    tag_model = db.query(models.Tags).filter(models.Tags.id == tag_id).first()
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+
+    tag_model = db.query(models.Tags).filter(models.Tags.id == tag_id)\
+        .filter(models.Tags.owner_id == user.get("id")).first()
 
     if tag_model is None:
         return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
@@ -117,6 +111,21 @@ async def delete_tag(request: Request, tag_id: int, db: Session = Depends(get_db
 
     db.commit()
 
+    return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
+
+
+@router.get("/popular/{tag_id}", response_class=HTMLResponse)
+async def is_popular_tag(request: Request, tag_id: int, db: Session = Depends(get_db)):
+    user = await get_current_user(request)
+    if user is None:
+        return RedirectResponse(url="/auth", status_code=status.HTTP_302_FOUND)
+
+    tag_model = db.query(models.Tags).filter(models.Tags.id == tag_id).first()
+
+    tag_model.popular = not tag_model.popular
+
+    db.add(tag_model)
+    db.commit()
     return RedirectResponse(url="/tags", status_code=status.HTTP_302_FOUND)
 
 
