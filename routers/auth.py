@@ -129,23 +129,6 @@ class CreateUser(BaseModel):
     password: str
 
 
-@router.post("/add/admin-user")
-async def create_admin_user(new_user: CreateUser, db: Session = Depends(get_db)):
-    new_user_model = models.Users()
-    new_user_model.email = new_user.email
-    new_user_model.username = new_user.username
-    new_user_model.first_name = new_user.first_name
-    new_user_model.last_name = new_user.last_name
-    new_user_model.is_active = True
-    new_user_model.is_admin = True
-
-    hash_password = get_password_hash(new_user.password)
-    new_user_model.hashed_password = hash_password
-
-    db.add(new_user_model)
-    db.commit()
-
-
 class LoginForm:
     def __init__(self, request: Request):
         self.request: Request = request

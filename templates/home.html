@@ -29,7 +29,7 @@
                     <td> {{ tag.description }} </td>
                     <td>
                         <button onclick="window.location.href='/tags/popular/{{tag.id}}'"
-                                type="button" class="btn btn-success btn-sm"> Dislike </button>
+                                type="button" class="btn btn-warning btn-sm"> Dislike </button>
                         <button onclick="window.location.href='/tags/edit-tag/{{tag.id}}'"
                                 type="button" class="btn btn-info btn-sm">
                             Edit
@@ -42,7 +42,7 @@
                 <tr class="pointer alert alert-success">
                     <td> {{ loop.index }} </td>
                     <td class="strike-through-td"> {{ tag.name }} </td>
-                    <td> {{ tag.description }} </td>
+                    <td> -------------- </td>
                     <td>
                         <button onclick="window.location.href='/tags/popular/{{tag.id}}'"
                                 type="button" class="btn btn-success btn-sm"> Set Popular </button>

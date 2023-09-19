@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import models
 from database import engine
-from routers import tags, auth
+from routers import tags, auth, admin
 from starlette.staticfiles import StaticFiles
 
 
@@ -13,3 +13,4 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(tags.router)
 app.include_router(auth.router)
+app.include_router(admin.router)
